@@ -24,31 +24,24 @@ def zero_rank_print(s):
 def save_videos_grid(videos: torch.Tensor, path: str, rescale=False, n_rows=6, fps=8):
     videos = rearrange(videos, "b c t h w -> t b c h w")
     outputs = []
-    for x in videos:
+    counter = 0
+    for i, x in videos:
         x = torchvision.utils.make_grid(x, nrow=n_rows)
         x = x.transpose(0, 1).transpose(1, 2).squeeze(-1)
         if rescale:
             x = (x + 1.0) / 2.0  # -1,1 -> 0,1
         x = (x * 255).numpy().astype(np.uint8)
         outputs.append(x)
+        
+        # Save each frame as an individual image with the counter value
+        frame_path = os.path.join(os.path.dirname(path), f'frame_{counter:04d}.png')
+        imageio.imsave(frame_path, x)
+        
+        counter += 1  # Increment the counter
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
     imageio.mimsave(path, outputs, fps=fps)
 
-def save_video_frames_as_png(videos: torch.Tensor, output_directory):
-    videos = rearrange(videos, "b c t h w -> t b c h w")
-    os.makedirs(output_directory, exist_ok=True)
-
-    for i, x in enumerate(videos):
-        x = torchvision.utils.make_grid(x)
-        x = x.permute(1, 2, 0)  # Change the channel order
-        x = (x * 255).byte().numpy()
-
-        # Define the output file path for each frame
-        frame_filename = os.path.join(output_directory, f"frame_{i:04d}.png")
-
-        # Save the frame as a PNG image
-        cv2.imwrite(frame_filename, x)
 
 # Usage
 sample_videos = YourVideoTensor()  # Replace this with your actual video data
