@@ -6,7 +6,7 @@ from typing import Union
 import torch
 import torchvision
 import torch.distributed as dist
-
+import cv2
 from tqdm import tqdm
 from einops import rearrange
 import PIL.Image
@@ -34,6 +34,28 @@ def save_videos_grid(videos: torch.Tensor, path: str, rescale=False, n_rows=6, f
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
     imageio.mimsave(path, outputs, fps=fps)
+
+def save_video_frames_as_png(videos: torch.Tensor, output_directory):
+    videos = rearrange(videos, "b c t h w -> t b c h w")
+    os.makedirs(output_directory, exist_ok=True)
+
+    for i, x in enumerate(videos):
+        x = torchvision.utils.make_grid(x)
+        x = x.permute(1, 2, 0)  # Change the channel order
+        x = (x * 255).byte().numpy()
+
+        # Define the output file path for each frame
+        frame_filename = os.path.join(output_directory, f"frame_{i:04d}.png")
+
+        # Save the frame as a PNG image
+        cv2.imwrite(frame_filename, x)
+
+# Usage
+sample_videos = YourVideoTensor()  # Replace this with your actual video data
+output_directory = "output_frames_directory"
+
+# Call the function to save each frame as a PNG image
+save_video_frames_as_png(sample_videos, output_directory)
 
 
 # DDIM Inversion
