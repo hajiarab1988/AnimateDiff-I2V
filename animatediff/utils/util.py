@@ -43,14 +43,6 @@ def save_videos_grid(videos: torch.Tensor, path: str, rescale=False, n_rows=6, f
     imageio.mimsave(path, outputs, fps=fps)
 
 
-# Usage
-sample_videos = YourVideoTensor()  # Replace this with your actual video data
-output_directory = "output_frames_directory"
-
-# Call the function to save each frame as a PNG image
-save_video_frames_as_png(sample_videos, output_directory)
-
-
 # DDIM Inversion
 @torch.no_grad()
 def init_prompt(prompt, pipeline):
